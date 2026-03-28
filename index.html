@@ -6,33 +6,26 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Trip Dashboard</title>
+<title>TripDash 🗾</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
-  --bg:#0a0a0f; --bg2:#111118; --bg3:#18181f; --bg4:#1f1f28;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-  --text:#e8e8f0; --text2:#8888a0; --text3:#4a4a60;
-  --accent:#e8354a; --accent2:#c01e31;
-  --green:#2ecc8a; --green-dim:rgba(46,204,138,0.12);
-  --gold:#f0c040; --gold-dim:rgba(240,192,64,0.1);
-  --red:#ff5566; --red-dim:rgba(255,85,102,0.12);
-  --amber:#ffb830; --amber-dim:rgba(255,184,48,0.12);
-  --blue:#4da6ff; --blue-dim:rgba(77,166,255,0.1);
-  --mono:'DM Mono',monospace; --display:'Syne',sans-serif;
-  --r:10px; --rs:6px;
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--bg4:#1f1f28;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8e8f0;--text2:#8888a0;--text3:#4a4a60;
+  --accent:#e8354a;--accent2:#c01e31;
+  --green:#2ecc8a;--gold:#f0c040;--red:#ff5566;--amber:#ffb830;--blue:#4da6ff;
+  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+  --r:10px;--rs:6px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;min-height:100vh;
   background-image:linear-gradient(rgba(232,53,74,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(232,53,74,0.025) 1px,transparent 1px);
   background-size:40px 40px;}
-
-/* ── LAYOUT ── */
 .app{display:flex;min-height:100vh;}
 .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .main{flex:1;overflow-y:auto;}
-
-/* ── SIDEBAR ── */
 .logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);}
 .logo-text{font-family:var(--display);font-size:18px;font-weight:800;color:var(--text);}
 .logo-text span{color:var(--accent);}
@@ -46,20 +39,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 .nav-icon{width:16px;text-align:center;font-size:14px;flex-shrink:0;}
 .nav-badge{margin-left:auto;background:var(--bg4);color:var(--text3);font-size:9px;padding:2px 6px;border-radius:99px;}
 .nav-item.active .nav-badge{background:rgba(232,53,74,0.2);color:var(--accent);}
-.sb-footer{padding:12px;border-top:1px solid var(--border);}
+.sb-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
 .admin-pill{display:flex;align-items:center;gap:6px;font-size:10px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;transition:all .15s;}
 .admin-pill.on{background:rgba(232,53,74,0.12);color:var(--accent);border:1px solid rgba(232,53,74,0.2);}
 .admin-pill.off{background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
-
-/* ── PAGES ── */
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);padding:4px 8px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.sync-dot.live{background:var(--green);animation:pulse 2s infinite;}
+.sync-dot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .page{display:none;padding:28px 24px;}
 .page.active{display:block;}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
 .page-title{font-family:var(--display);font-size:24px;font-weight:700;color:var(--text);}
 .page-title span{color:var(--accent);}
 .page-sub{font-size:12px;color:var(--text2);margin-top:3px;}
-
-/* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--rs);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s;border:1px solid transparent;}
 .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
 .btn-primary:hover{background:var(--accent2);}
@@ -67,34 +61,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 .btn-secondary:hover{color:var(--text);background:var(--bg4);}
 .btn-ghost{background:transparent;color:var(--text2);}
 .btn-ghost:hover{color:var(--text);background:var(--bg3);}
-.btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(255,85,102,.2);}
+.btn-danger{background:rgba(255,85,102,.12);color:var(--red);border-color:rgba(255,85,102,.2);}
 .btn-sm{padding:5px 10px;font-size:11px;}
 .btn-xs{padding:3px 7px;font-size:10px;}
-
-/* ── OPT BUTTONS (In/Out/Paid) ── */
-.opt-btn{min-width:42px;padding:5px 10px;border-radius:var(--rs);font-size:11px;font-family:var(--mono);font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,0.15);background:transparent;color:var(--text3);transition:all .15s;}
+.opt-btn{min-width:44px;padding:6px 10px;border-radius:var(--rs);font-size:11px;font-family:var(--mono);font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,0.15);background:transparent;color:var(--text3);transition:all .15s;}
 .opt-btn:hover{border-color:rgba(255,255,255,0.3);color:var(--text2);}
 .opt-btn.in-active{background:var(--green);border-color:var(--green);color:#fff;}
 .opt-btn.out-active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .opt-btn.paid-active{background:var(--gold);border-color:var(--gold);color:#111;}
-.opt-btn.unpaid-active{background:var(--bg4);border-color:var(--border2);color:var(--text3);}
-.opt-btn:disabled{opacity:.35;cursor:not-allowed;}
-
-/* ── CARDS / PANELS ── */
+.opt-btn:disabled{opacity:.3;cursor:not-allowed;}
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden;}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg3);}
 .panel-title{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
 .badge{font-family:var(--mono);font-size:10px;background:var(--bg4);color:var(--text2);padding:2px 8px;border-radius:99px;border:1px solid var(--border);}
-
-/* ── KPI GRID ── */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
 .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;position:relative;overflow:hidden;}
 .kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--accent));opacity:.7;}
 .kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:6px;}
 .kpi-val{font-family:var(--display);font-size:22px;font-weight:700;color:var(--text);}
 .kpi-sub{font-size:10px;color:var(--text2);margin-top:3px;}
-
-/* ── ACTIVITY CARD ── */
 .act-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden;transition:border-color .2s;}
 .act-card:hover{border-color:var(--border2);}
 .act-header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg3);border-bottom:1px solid var(--border);}
@@ -102,16 +87,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 .act-info{flex:1;}
 .act-name{font-family:var(--display);font-size:15px;font-weight:700;color:var(--text);}
 .act-price{font-size:11px;color:var(--gold);margin-top:2px;font-family:var(--mono);}
-.act-stats{display:flex;gap:16px;align-items:center;}
-.act-stat{text-align:right;}
-.act-stat-val{font-family:var(--display);font-size:16px;font-weight:700;}
-.act-stat-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
-
-/* ── PROGRESS BAR ── */
 .prog-bar{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin:8px 0;}
 .prog-fill{height:100%;border-radius:99px;transition:width .5s;}
-
-/* ── PERSON ROW ── */
 .person-row{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--border);transition:background .15s;}
 .person-row:last-child{border-bottom:none;}
 .person-row:hover{background:rgba(255,255,255,0.02);}
@@ -119,87 +96,68 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .person-name{flex:1;font-size:13px;color:var(--text);}
 .person-status{font-size:10px;color:var(--text3);margin-top:1px;}
-
-/* ── MESSAGE BOX ── */
 .msg-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.7;margin:12px 0;white-space:pre-wrap;word-break:break-word;}
-
-/* ── MODALS ── */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.7);}
 .modal-title{font-family:var(--display);font-size:17px;font-weight:700;color:var(--text);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
-.modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;line-height:1;}
+.modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;}
 .modal-close:hover{color:var(--text);}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
-
-/* ── FORMS ── */
 .fg{margin-bottom:14px;}
 .fg label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:5px;}
 .fi{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;transition:border-color .15s;}
 .fi:focus{border-color:var(--accent);}
 .fi::placeholder{color:var(--text3);}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-/* ── EMPTY STATE ── */
+.filter-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+.ftab{padding:5px 12px;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);transition:all .15s;}
+.ftab.active{background:rgba(232,53,74,0.12);color:var(--accent);border-color:rgba(232,53,74,0.25);}
 .empty{padding:36px;text-align:center;}
 .empty-icon{font-size:28px;margin-bottom:10px;}
 .empty-title{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text2);margin-bottom:5px;}
 .empty-sub{font-size:12px;color:var(--text3);}
-
-/* ── PEOPLE LIST (admin) ── */
-.people-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:5px 12px 5px 8px;font-size:12px;color:var(--text2);}
-.people-chip .del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0;line-height:1;margin-left:2px;}
-.people-chip .del:hover{color:var(--red);}
-
-/* ── TOAST ── */
 #toast-box{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.5);animation:tIn .25s ease-out,tOut .25s ease-in 2.75s forwards;max-width:260px;}
 .toast.s{border-left:3px solid var(--green);}
 .toast.e{border-left:3px solid var(--red);}
 .toast.i{border-left:3px solid var(--blue);}
 @keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateY(-4px)}}
-
-/* ── FILTER TABS ── */
-.filter-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
-.ftab{padding:5px 12px;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);transition:all .15s;}
-.ftab.active{background:rgba(232,53,74,0.12);color:var(--accent);border-color:rgba(232,53,74,0.25);}
-.ftab:hover:not(.active){background:var(--bg3);color:var(--text);}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:6px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
-
-/* ── MOBILE ── */
+@keyframes tOut{from{opacity:1}to{opacity:0}}
 #mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:var(--bg2);border-top:1px solid var(--border2);padding-bottom:env(safe-area-inset-bottom,0);}
 .mnav{display:flex;}
-.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;font-family:var(--mono);font-size:9px;color:var(--text3);background:none;border:none;cursor:pointer;transition:color .15s;}
+.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;font-family:var(--mono);font-size:9px;color:var(--text3);background:none;border:none;cursor:pointer;}
 .mnav-btn.active{color:var(--accent);}
 .mnav-icon{font-size:16px;}
-
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;gap:16px;}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:768px){
   .sidebar{display:none;}
   #mobile-nav{display:flex;}
   .page{padding:16px 14px;padding-bottom:90px;}
   .fr2{grid-template-columns:1fr;}
   .kpi-grid{grid-template-columns:1fr 1fr;}
-  .act-stats{gap:8px;}
 }
-
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .page.active{animation:fadeIn .2s ease-out;}
 </style>
 </head>
 <body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div style="font-family:var(--display);font-size:16px;color:var(--text2)">Connecting to database…</div>
+</div>
+
 <div id="toast-box"></div>
 
 <div class="app">
-<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-text">Trip<span>Dash</span></div>
-    <div class="logo-sub">Activity Manager</div>
+    <div class="logo-sub">Activity Manager · Live Sync</div>
   </div>
   <nav class="nav">
     <div class="nav-sec">Main</div>
@@ -211,37 +169,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
     <div class="nav-item" onclick="goPage('summary',this)"><span class="nav-icon">📊</span> Summary</div>
   </nav>
   <div class="sb-footer">
-    <div class="admin-pill" id="admin-pill" onclick="toggleAdmin()">
-      <span id="admin-icon">🔓</span>
-      <span id="admin-label">Admin Mode</span>
+    <div class="sync-pill"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Connecting…</span></div>
+    <div class="admin-pill off" id="admin-pill" onclick="toggleAdmin()">
+      <span id="admin-icon">🔓</span><span id="admin-label">Admin Mode</span>
     </div>
   </div>
 </aside>
 
-<!-- MAIN -->
 <main class="main" id="main-area">
-
 <!-- OVERVIEW -->
 <div class="page active" id="page-overview">
   <div class="page-header">
-    <div><div class="page-title">Trip <span>Overview</span></div><div class="page-sub">Your group trip at a glance</div></div>
+    <div><div class="page-title">Trip <span>Overview</span></div><div class="page-sub">Live sync · all devices update instantly</div></div>
   </div>
   <div class="kpi-grid">
     <div class="kpi" style="--kc:var(--accent)"><div class="kpi-label">Activities</div><div class="kpi-val" id="ov-acts">0</div><div class="kpi-sub">planned</div></div>
     <div class="kpi" style="--kc:var(--blue)"><div class="kpi-label">People</div><div class="kpi-val" id="ov-people">0</div><div class="kpi-sub">in group</div></div>
-    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Total Collected</div><div class="kpi-val" id="ov-collected">$0</div><div class="kpi-sub" id="ov-collected-sub">of $0 expected</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-label">Collected</div><div class="kpi-val" id="ov-collected">$0</div><div class="kpi-sub" id="ov-collected-sub">of $0 expected</div></div>
     <div class="kpi" style="--kc:var(--amber)"><div class="kpi-label">Still Owed</div><div class="kpi-val" id="ov-owed">$0</div><div class="kpi-sub">outstanding</div></div>
   </div>
-  <div id="ov-activity-list"></div>
+  <div id="ov-list"></div>
 </div>
 
 <!-- ACTIVITIES -->
 <div class="page" id="page-activities">
   <div class="page-header">
-    <div><div class="page-title">Trip <span>Activities</span></div><div class="page-sub">Manage activities, track participation & payments</div></div>
-    <div id="acts-admin-btns" style="display:none">
-      <button class="btn btn-primary btn-sm" onclick="openModal('add-act')">+ Add Activity</button>
-    </div>
+    <div><div class="page-title">Trip <span>Activities</span></div><div class="page-sub">Track participation & payments per activity</div></div>
+    <div id="acts-admin-btns" style="display:none"><button class="btn btn-primary btn-sm" onclick="openModal('add-act')">+ Add Activity</button></div>
   </div>
   <div class="filter-tabs">
     <div class="ftab active" onclick="filterActs('all',this)">All</div>
@@ -255,9 +209,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 <div class="page" id="page-people">
   <div class="page-header">
     <div><div class="page-title">Trip <span>People</span></div><div class="page-sub">Everyone in your travel group</div></div>
-    <div id="people-admin-btns" style="display:none">
-      <button class="btn btn-primary btn-sm" onclick="openModal('add-person')">+ Add Person</button>
-    </div>
+    <div id="people-admin-btns" style="display:none"><button class="btn btn-primary btn-sm" onclick="openModal('add-person')">+ Add Person</button></div>
   </div>
   <div class="panel">
     <div class="panel-header"><div class="panel-title">👥 Group Members <span class="badge" id="people-badge">0</span></div></div>
@@ -267,9 +219,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 
 <!-- MESSAGES -->
 <div class="page" id="page-messages">
-  <div class="page-header">
-    <div><div class="page-title">Message <span>Generator</span></div><div class="page-sub">Ready-to-send messages for each activity</div></div>
-  </div>
+  <div class="page-header"><div><div class="page-title">Message <span>Generator</span></div><div class="page-sub">Ready-to-send messages for each activity</div></div></div>
   <div id="msg-list"></div>
 </div>
 
@@ -277,22 +227,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 <div class="page" id="page-summary">
   <div class="page-header">
     <div><div class="page-title">Payment <span>Summary</span></div><div class="page-sub">Who owes what across all activities</div></div>
-    <button class="btn btn-secondary btn-sm" onclick="exportSummary()">↓ Export CSV</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">↓ Export CSV</button>
   </div>
   <div id="summary-content"></div>
 </div>
-
 </main>
 </div>
 
 <!-- MOBILE NAV -->
 <nav id="mobile-nav">
   <div class="mnav">
-    <button class="mnav-btn active" id="mn-overview" onclick="mGo('overview',this)"><span class="mnav-icon">◈</span>Home</button>
-    <button class="mnav-btn" id="mn-activities" onclick="mGo('activities',this)"><span class="mnav-icon">🎯</span>Activities</button>
-    <button class="mnav-btn" id="mn-people" onclick="mGo('people',this)"><span class="mnav-icon">👥</span>People</button>
-    <button class="mnav-btn" id="mn-messages" onclick="mGo('messages',this)"><span class="mnav-icon">📩</span>Messages</button>
-    <button class="mnav-btn" id="mn-summary" onclick="mGo('summary',this)"><span class="mnav-icon">📊</span>Summary</button>
+    <button class="mnav-btn active" id="mn-overview"    onclick="mGo('overview',this)"><span class="mnav-icon">◈</span>Home</button>
+    <button class="mnav-btn"        id="mn-activities"  onclick="mGo('activities',this)"><span class="mnav-icon">🎯</span>Activities</button>
+    <button class="mnav-btn"        id="mn-people"      onclick="mGo('people',this)"><span class="mnav-icon">👥</span>People</button>
+    <button class="mnav-btn"        id="mn-messages"    onclick="mGo('messages',this)"><span class="mnav-icon">📩</span>Messages</button>
+    <button class="mnav-btn"        id="mn-summary"     onclick="mGo('summary',this)"><span class="mnav-icon">📊</span>Summary</button>
   </div>
 </nav>
 
@@ -317,13 +266,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 <div class="modal-overlay" id="modal-edit-act">
   <div class="modal">
     <div class="modal-title">Edit Activity <button class="modal-close" onclick="closeModal('edit-act')">×</button></div>
-    <div class="fg"><label>Activity Name</label><input class="fi" id="edit-act-name" placeholder="e.g. teamLab Planets"></div>
+    <div class="fg"><label>Activity Name</label><input class="fi" id="edit-act-name"></div>
     <div class="fr2">
-      <div class="fg"><label>Price Per Person ($)</label><input class="fi" type="number" id="edit-act-price" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="fg"><label>Emoji Icon</label><input class="fi" id="edit-act-emoji" placeholder="🎌" maxlength="2"></div>
+      <div class="fg"><label>Price Per Person ($)</label><input class="fi" type="number" id="edit-act-price" min="0" step="0.01"></div>
+      <div class="fg"><label>Emoji Icon</label><input class="fi" id="edit-act-emoji" maxlength="2"></div>
     </div>
-    <div class="fg"><label>TikTok URL (optional)</label><input class="fi" id="edit-act-tiktok" placeholder="https://www.tiktok.com/..."></div>
-    <div class="fg"><label>Description (optional)</label><input class="fi" id="edit-act-desc" placeholder="Short description..."></div>
+    <div class="fg"><label>TikTok URL</label><input class="fi" id="edit-act-tiktok"></div>
+    <div class="fg"><label>Description</label><input class="fi" id="edit-act-desc"></div>
     <input type="hidden" id="edit-act-id">
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('edit-act')">Cancel</button>
@@ -345,43 +294,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-//  DB
-// ═══════════════════════════════════════════
-var DB = {
-  get: function(k,d){ try{var v=localStorage.getItem('td_'+k);return v!==null?JSON.parse(v):d;}catch(e){return d;} },
-  set: function(k,v){ try{localStorage.setItem('td_'+k,JSON.stringify(v));}catch(e){} }
-};
+// ═══════════════════════════════
+//  SUPABASE
+// ═══════════════════════════════
+var SUPA_URL  = 'https://inirnmxqmtlffkkycveu.supabase.co';
+var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImluaXJubXhxbXRsZmZra3ljdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjEzNDksImV4cCI6MjA5MDI5NzM0OX0.LCvhJwLsIEFksOFZim1smKLpzCtbPQG2CJGpQEv43uY';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  STATE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 var S = {
-  activities: DB.get('activities', []),  // [{id,name,price,emoji,tiktok,desc}]
-  people:     DB.get('people', []),      // [{id,name,emoji}]
-  // participation[actId][personId] = 'in'|'out'  (default 'out')
-  participation: DB.get('participation', {}),
-  // payments[actId][personId] = true|false
-  payments: DB.get('payments', {}),
-  isAdmin: DB.get('isAdmin', false),
+  activities: [],
+  people: [],
+  participation: [], // [{id, activity_id, person_id, status, paid}]
+  isAdmin: localStorage.getItem('td_admin') === 'true',
   actsFilter: 'all'
 };
 
-function save() {
-  DB.set('activities', S.activities);
-  DB.set('people', S.people);
-  DB.set('participation', S.participation);
-  DB.set('payments', S.payments);
-  DB.set('isAdmin', S.isAdmin);
-}
-
 function uid() { return Math.random().toString(36).substr(2,9); }
-
-// ═══════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════
 function el(id){ return document.getElementById(id); }
 
+// ═══════════════════════════════
+//  TOAST
+// ═══════════════════════════════
 function toast(msg, type) {
   var t = document.createElement('div');
   t.className = 'toast ' + (type||'i');
@@ -390,194 +326,257 @@ function toast(msg, type) {
   setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3100);
 }
 
+// ═══════════════════════════════
+//  MODALS
+// ═══════════════════════════════
 function openModal(id){ var m=el('modal-'+id); if(m) m.classList.add('open'); }
 function closeModal(id){ var m=el('modal-'+id); if(m) m.classList.remove('open'); }
 
-function getStatus(actId, personId) {
-  return (S.participation[actId] && S.participation[actId][personId]) || 'out';
+// ═══════════════════════════════
+//  SYNC STATUS
+// ═══════════════════════════════
+function setSyncStatus(status) {
+  var dot   = el('sync-dot');
+  var label = el('sync-label');
+  if(!dot) return;
+  dot.className = 'sync-dot' + (status==='live' ? ' live' : status==='err' ? ' err' : '');
+  label.textContent = status==='live' ? 'Live sync' : status==='err' ? 'Offline' : 'Connecting…';
 }
-function isPaid(actId, personId) {
-  return !!(S.payments[actId] && S.payments[actId][personId]);
+
+// ═══════════════════════════════
+//  DB HELPERS
+// ═══════════════════════════════
+function getParticipation(actId, personId) {
+  return S.participation.find(function(p){ return p.activity_id===actId && p.person_id===personId; });
 }
 function isIn(actId, personId) {
-  return getStatus(actId, personId) === 'in';
+  var p = getParticipation(actId, personId);
+  return p ? p.status==='in' : false;
 }
-
+function isPaid(actId, personId) {
+  var p = getParticipation(actId, personId);
+  return p ? !!p.paid : false;
+}
 function actStats(act) {
   var inCount=0, paidCount=0, expected=0, collected=0;
-  S.people.forEach(function(p){
-    if(isIn(act.id,p.id)){ inCount++; expected+=act.price; }
-    if(isIn(act.id,p.id)&&isPaid(act.id,p.id)){ paidCount++; collected+=act.price; }
+  S.people.forEach(function(person){
+    if(isIn(act.id, person.id)){ inCount++; expected+=act.price; }
+    if(isIn(act.id, person.id) && isPaid(act.id, person.id)){ paidCount++; collected+=act.price; }
   });
-  return { inCount:inCount, paidCount:paidCount, expected:expected, collected:collected };
+  return {inCount:inCount, paidCount:paidCount, expected:expected, collected:collected};
 }
 
-// ═══════════════════════════════════════════
-//  ADMIN
-// ═══════════════════════════════════════════
-function toggleAdmin() {
-  var pwd = prompt('Enter admin password:');
-  if (pwd === null) return;
-  if (!S.isAdmin) {
-    if (pwd === 'japan2025') {
-      S.isAdmin = true; save(); renderAll(); toast('Admin mode ON 🔑','s');
-    } else { toast('Wrong password','e'); }
-  } else {
-    S.isAdmin = false; save(); renderAll(); toast('Admin mode OFF','i');
+// ═══════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════
+async function loadAll() {
+  try {
+    var [actsRes, peopleRes, partRes] = await Promise.all([
+      sb.from('td_activities').select('*').order('created_at'),
+      sb.from('td_people').select('*').order('created_at'),
+      sb.from('td_participation').select('*')
+    ]);
+    S.activities    = actsRes.data   || [];
+    S.people        = peopleRes.data  || [];
+    S.participation = partRes.data    || [];
+    setSyncStatus('live');
+    renderAll();
+    el('loading').style.display = 'none';
+  } catch(e) {
+    setSyncStatus('err');
+    toast('Could not connect to database', 'e');
+    el('loading').style.display = 'none';
   }
 }
 
-function applyAdmin() {
-  var pill = el('admin-pill');
-  el('admin-icon').textContent = S.isAdmin ? '🔑' : '🔓';
-  el('admin-label').textContent = S.isAdmin ? 'Admin: ON' : 'Admin Mode';
-  pill.className = 'admin-pill ' + (S.isAdmin ? 'on' : 'off');
-  // Show/hide admin buttons — always re-apply after any render
-  var actBtn    = el('acts-admin-btns');
-  var peopleBtn = el('people-admin-btns');
-  if(actBtn)    actBtn.style.display    = S.isAdmin ? '' : 'none';
-  if(peopleBtn) peopleBtn.style.display = S.isAdmin ? '' : 'none';
+// ═══════════════════════════════
+//  REALTIME SUBSCRIPTIONS
+// ═══════════════════════════════
+function setupRealtime() {
+  sb.channel('trip-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'td_activities'},    function(){ loadAll(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'td_people'},        function(){ loadAll(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'td_participation'}, function(){ loadAll(); })
+    .subscribe(function(status){
+      setSyncStatus(status === 'SUBSCRIBED' ? 'live' : 'err');
+    });
 }
 
-// ═══════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
+//  ADMIN
+// ═══════════════════════════════
+function toggleAdmin() {
+  if (!S.isAdmin) {
+    var pwd = prompt('Enter admin password:');
+    if (pwd === null) return;
+    if (pwd === 'japan2025') {
+      S.isAdmin = true;
+      localStorage.setItem('td_admin','true');
+      applyAdmin();
+      toast('Admin mode ON 🔑','s');
+    } else { toast('Wrong password','e'); }
+  } else {
+    S.isAdmin = false;
+    localStorage.setItem('td_admin','false');
+    applyAdmin();
+    toast('Admin mode OFF','i');
+  }
+}
+function applyAdmin() {
+  el('admin-icon').textContent  = S.isAdmin ? '🔑' : '🔓';
+  el('admin-label').textContent = S.isAdmin ? 'Admin: ON' : 'Admin Mode';
+  el('admin-pill').className    = 'admin-pill ' + (S.isAdmin ? 'on' : 'off');
+  var a = el('acts-admin-btns');
+  var p = el('people-admin-btns');
+  if(a) a.style.display = S.isAdmin ? '' : 'none';
+  if(p) p.style.display = S.isAdmin ? '' : 'none';
+}
+
+// ═══════════════════════════════
+//  NAV
+// ═══════════════════════════════
 function goPage(pageId, navEl) {
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   var pg = el('page-'+pageId); if(pg) pg.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  else {
-    var m = document.querySelector('.nav-item[onclick*="\''+pageId+'\'"]');
-    if(m) m.classList.add('active');
-  }
+  else { var m=document.querySelector('.nav-item[onclick*="\''+pageId+'\'"]'); if(m) m.classList.add('active'); }
   document.querySelectorAll('.mnav-btn').forEach(function(b){ b.classList.remove('active'); });
   var mb = el('mn-'+pageId); if(mb) mb.classList.add('active');
   renderPage(pageId);
+  applyAdmin();
 }
-
 function mGo(pageId, btn) {
   goPage(pageId, null);
   document.querySelectorAll('.mnav-btn').forEach(function(b){ b.classList.remove('active'); });
   if(btn) btn.classList.add('active');
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  ACTIVITIES CRUD
-// ═══════════════════════════════════════════
-function saveActivity() {
+// ═══════════════════════════════
+async function saveActivity() {
   var name  = el('act-name').value.trim();
   var price = parseFloat(el('act-price').value) || 0;
   var emoji = el('act-emoji').value.trim() || '🎯';
   var tiktok= el('act-tiktok').value.trim();
   var desc  = el('act-desc').value.trim();
   if (!name) { toast('Enter activity name','e'); return; }
-  S.activities.push({ id:uid(), name:name, price:price, emoji:emoji, tiktok:tiktok, desc:desc });
-  save(); closeModal('add-act'); renderAll(); toast(name+' added!','s');
+  var {error} = await sb.from('td_activities').insert({name,price,emoji,tiktok_url:tiktok,description:desc});
+  if(error) { toast('Error: '+error.message,'e'); return; }
+  closeModal('add-act');
+  toast(name+' added!','s');
   ['act-name','act-price','act-emoji','act-tiktok','act-desc'].forEach(function(i){ var e=el(i); if(e) e.value=''; });
 }
 
 function openEditAct(actId) {
-  var a = S.activities.find(function(x){ return x.id===actId; });
-  if(!a) return;
+  var a = S.activities.find(function(x){ return x.id===actId; }); if(!a) return;
   el('edit-act-name').value  = a.name;
   el('edit-act-price').value = a.price;
   el('edit-act-emoji').value = a.emoji||'';
-  el('edit-act-tiktok').value= a.tiktok||'';
-  el('edit-act-desc').value  = a.desc||'';
+  el('edit-act-tiktok').value= a.tiktok_url||'';
+  el('edit-act-desc').value  = a.description||'';
   el('edit-act-id').value    = actId;
   openModal('edit-act');
 }
-
-function updateActivity() {
-  var id    = el('edit-act-id').value;
-  var a     = S.activities.find(function(x){ return x.id===id; });
-  if(!a) return;
-  a.name   = el('edit-act-name').value.trim() || a.name;
-  a.price  = parseFloat(el('edit-act-price').value) || 0;
-  a.emoji  = el('edit-act-emoji').value.trim() || '🎯';
-  a.tiktok = el('edit-act-tiktok').value.trim();
-  a.desc   = el('edit-act-desc').value.trim();
-  save(); closeModal('edit-act'); renderAll(); toast('Activity updated','s');
+async function updateActivity() {
+  var id = el('edit-act-id').value;
+  var {error} = await sb.from('td_activities').update({
+    name: el('edit-act-name').value.trim(),
+    price: parseFloat(el('edit-act-price').value)||0,
+    emoji: el('edit-act-emoji').value.trim()||'🎯',
+    tiktok_url: el('edit-act-tiktok').value.trim(),
+    description: el('edit-act-desc').value.trim()
+  }).eq('id',id);
+  if(error) { toast('Error: '+error.message,'e'); return; }
+  closeModal('edit-act'); toast('Updated!','s');
 }
-
-function deleteActivity(actId) {
+async function deleteActivity(actId) {
   if(!confirm('Delete this activity?')) return;
-  S.activities = S.activities.filter(function(a){ return a.id!==actId; });
-  delete S.participation[actId];
-  delete S.payments[actId];
-  save(); renderAll(); toast('Activity deleted','i');
+  await sb.from('td_participation').delete().eq('activity_id',actId);
+  await sb.from('td_activities').delete().eq('id',actId);
+  toast('Deleted','i');
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  PEOPLE CRUD
-// ═══════════════════════════════════════════
-function savePerson() {
+// ═══════════════════════════════
+async function savePerson() {
   var name  = el('person-name').value.trim();
   var emoji = el('person-emoji').value.trim() || '🧑';
   if (!name) { toast('Enter a name','e'); return; }
-  S.people.push({ id:uid(), name:name, emoji:emoji });
-  save(); closeModal('add-person'); renderAll(); toast(name+' added!','s');
+  var {error} = await sb.from('td_people').insert({name,emoji});
+  if(error) { toast('Error: '+error.message,'e'); return; }
+  closeModal('add-person'); toast(name+' added!','s');
   el('person-name').value=''; el('person-emoji').value='';
 }
-
-function deletePerson(personId) {
-  if(!confirm('Remove this person from all activities?')) return;
-  S.people = S.people.filter(function(p){ return p.id!==personId; });
-  // clean up participation and payments
-  Object.keys(S.participation).forEach(function(aId){
-    delete S.participation[aId][personId];
-  });
-  Object.keys(S.payments).forEach(function(aId){
-    delete S.payments[aId][personId];
-  });
-  save(); renderAll(); toast('Person removed','i');
+async function deletePerson(personId) {
+  if(!confirm('Remove this person?')) return;
+  await sb.from('td_participation').delete().eq('person_id',personId);
+  await sb.from('td_people').delete().eq('id',personId);
+  toast('Removed','i');
 }
 
-// ═══════════════════════════════════════════
-//  PARTICIPATION & PAYMENTS
-// ═══════════════════════════════════════════
-function setStatus(actId, personId, status) {
-  if(!S.participation[actId]) S.participation[actId]={};
-  S.participation[actId][personId] = status;
-  // If out, clear payment
-  if(status==='out'){
-    if(!S.payments[actId]) S.payments[actId]={};
-    S.payments[actId][personId] = false;
+// ═══════════════════════════════
+//  PARTICIPATION
+// ═══════════════════════════════
+async function setStatus(actId, personId, status) {
+  var existing = getParticipation(actId, personId);
+  var paid = (status==='in') ? (existing ? existing.paid : false) : false;
+
+  // Optimistic UI update
+  if(existing) {
+    existing.status = status; existing.paid = paid;
+  } else {
+    S.participation.push({id:uid(), activity_id:actId, person_id:personId, status:status, paid:paid});
   }
-  save();
-  // Update DOM directly (classList pattern)
-  var safeKey = actId+'_'+personId;
-  var btnIn  = el('btn-in-'+safeKey);
-  var btnOut = el('btn-out-'+safeKey);
-  var btnPaid= el('btn-paid-'+safeKey);
-  var row    = el('row-'+safeKey);
-  if(btnIn)  btnIn.classList.toggle('in-active',  status==='in');
-  if(btnOut) btnOut.classList.toggle('out-active', status==='out');
-  if(btnPaid){ btnPaid.disabled = (status!=='in'); }
-  if(row)    row.classList.toggle('is-in', status==='in');
-  updateActStats(actId);
-  updateOverview();
+  applyRowUI(actId, personId);
+  updateActStatsUI(actId);
+  updateOverviewKPIs();
+
+  if(existing) {
+    await sb.from('td_participation').update({status:status, paid:paid}).eq('activity_id',actId).eq('person_id',personId);
+  } else {
+    await sb.from('td_participation').upsert({activity_id:actId, person_id:personId, status:status, paid:paid},{onConflict:'activity_id,person_id'});
+  }
 }
 
-function setPayment(actId, personId, paid) {
-  if(!isIn(actId,personId)) return; // only IN people can pay
-  if(!S.payments[actId]) S.payments[actId]={};
-  S.payments[actId][personId] = paid;
-  save();
-  var safeKey = actId+'_'+personId;
-  var btnPaid   = el('btn-paid-'+safeKey);
-  var btnUnpaid = el('btn-unpaid-'+safeKey);
-  if(btnPaid)   btnPaid.classList.toggle('paid-active',   paid);
-  if(btnUnpaid) btnUnpaid.classList.toggle('unpaid-active', !paid);
-  updateActStats(actId);
-  updateOverview();
+async function setPayment(actId, personId, paid) {
+  if(!isIn(actId, personId)) return;
+  var existing = getParticipation(actId, personId);
+  if(existing) existing.paid = paid;
+
+  // Optimistic UI
+  applyRowUI(actId, personId);
+  updateActStatsUI(actId);
+  updateOverviewKPIs();
+
+  await sb.from('td_participation').upsert({activity_id:actId, person_id:personId, status:'in', paid:paid},{onConflict:'activity_id,person_id'});
 }
 
-function updateActStats(actId) {
-  var a = S.activities.find(function(x){ return x.id===actId; });
-  if(!a) return;
-  var st = actStats(a);
+// Apply classList to existing DOM elements (no re-render)
+function applyRowUI(actId, personId) {
+  var sk = actId+'_'+personId;
+  var inFlag  = isIn(actId, personId);
+  var paidFlag = isPaid(actId, personId);
+  var row     = el('row-'+sk);
+  var btnIn   = el('btn-in-'+sk);
+  var btnOut  = el('btn-out-'+sk);
+  var btnPaid = el('btn-paid-'+sk);
+  var btnNot  = el('btn-not-'+sk);
+  var statusEl= el('pstatus-'+sk);
+  if(row)     row.classList.toggle('is-in', inFlag);
+  if(btnIn)   btnIn.classList.toggle('in-active', inFlag);
+  if(btnOut)  btnOut.classList.toggle('out-active', !inFlag);
+  if(btnPaid) { btnPaid.classList.toggle('paid-active', paidFlag); btnPaid.disabled = !inFlag; }
+  if(btnNot)  { btnNot.disabled = !inFlag; }
+  if(statusEl) statusEl.textContent = inFlag ? (paidFlag?'✓ Paid':'Unpaid') : 'Not going';
+}
+
+function updateActStatsUI(actId) {
+  var act = S.activities.find(function(a){ return a.id===actId; }); if(!act) return;
+  var st = actStats(act);
+  var pct = st.expected>0 ? Math.round(st.collected/st.expected*100) : 0;
   var inEl  = el('stat-in-'+actId);
   var colEl = el('stat-col-'+actId);
   var expEl = el('stat-exp-'+actId);
@@ -585,16 +584,25 @@ function updateActStats(actId) {
   if(inEl)  inEl.textContent  = st.inCount;
   if(colEl) colEl.textContent = '$'+st.collected.toFixed(0);
   if(expEl) expEl.textContent = 'of $'+st.expected.toFixed(0);
-  if(barEl) barEl.style.width = st.expected>0 ? Math.round(st.collected/st.expected*100)+'%' : '0%';
+  if(barEl) barEl.style.width = pct+'%';
 }
 
-// ═══════════════════════════════════════════
-//  RENDER ACTIVITIES
-// ═══════════════════════════════════════════
-var actsFilter = 'all';
+function updateOverviewKPIs() {
+  var totalExp=0, totalCol=0;
+  S.activities.forEach(function(a){ var st=actStats(a); totalExp+=st.expected; totalCol+=st.collected; });
+  el('ov-acts').textContent    = S.activities.length;
+  el('ov-people').textContent  = S.people.length;
+  el('ov-collected').textContent = '$'+totalCol.toFixed(0);
+  el('ov-collected-sub').textContent = 'of $'+totalExp.toFixed(0)+' expected';
+  el('ov-owed').textContent = '$'+(totalExp-totalCol).toFixed(0);
+}
 
+// ═══════════════════════════════
+//  RENDER ACTIVITIES
+// ═══════════════════════════════
+var actsFilter = 'all';
 function filterActs(f, btn) {
-  actsFilter = f;
+  actsFilter=f;
   document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('active'); });
   if(btn) btn.classList.add('active');
   renderActivities();
@@ -602,275 +610,202 @@ function filterActs(f, btn) {
 
 function renderActivities() {
   var container = el('act-list');
+  el('nb-acts').textContent = S.activities.length;
   if(!S.activities.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-title">No activities yet</div><div class="empty-sub">'+(S.isAdmin?'Click "+ Add Activity" to get started':'Ask admin to add activities')+'</div></div>';
-    el('nb-acts').textContent = '0';
+    container.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><div class="empty-title">No activities yet</div><div class="empty-sub">'+(S.isAdmin?'Click "+ Add Activity" to get started':'Ask admin to add activities')+'</div></div>';
     return;
   }
-  el('nb-acts').textContent = S.activities.length;
-
   container.innerHTML = S.activities.map(function(act) {
     var st = actStats(act);
     var pct = st.expected>0 ? Math.round(st.collected/st.expected*100) : 0;
+    if(actsFilter==='unpaid' && !S.people.some(function(p){ return isIn(act.id,p.id)&&!isPaid(act.id,p.id); })) return '';
+    if(actsFilter==='in' && st.inCount===0) return '';
 
-    // Filter logic
-    if(actsFilter==='unpaid') {
-      var hasUnpaid = S.people.some(function(p){ return isIn(act.id,p.id)&&!isPaid(act.id,p.id); });
-      if(!hasUnpaid) return '';
-    }
-    if(actsFilter==='in') {
-      if(st.inCount===0) return '';
-    }
+    var tiktokBtn = act.tiktok_url
+      ? '<a href="'+act.tiktok_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:4px 8px;font-size:10px;color:#ccc;text-decoration:none">🎵 TikTok</a>' : '';
+    var adminBtns = S.isAdmin
+      ? '<button class="btn btn-ghost btn-xs" onclick="openEditAct(\''+act.id+'\')">Edit</button><button class="btn btn-danger btn-xs" onclick="deleteActivity(\''+act.id+'\')">Delete</button>' : '';
 
-    var peopleRows = S.people.map(function(p) {
-      var sk      = act.id+'_'+p.id;
-      var status  = getStatus(act.id,p.id);
-      var paid    = isPaid(act.id,p.id);
-      var inFlag  = status==='in';
-      var hiddenByFilter = (actsFilter==='unpaid' && !(inFlag && !paid)) || (actsFilter==='in' && !inFlag);
-
-      return '<div id="row-'+sk+'" class="person-row'+(inFlag?' is-in':'')+'"'+(hiddenByFilter?' style="display:none"':'')+' >'
+    var rows = S.people.map(function(p) {
+      var sk    = act.id+'_'+p.id;
+      var inFlag= isIn(act.id,p.id);
+      var paidFlag=isPaid(act.id,p.id);
+      return '<div id="row-'+sk+'" class="person-row'+(inFlag?' is-in':'')+'">'
         +'<div class="avatar">'+p.emoji+'</div>'
         +'<div style="flex:1"><div class="person-name">'+p.name+'</div>'
-        +'<div class="person-status">'+(inFlag?(paid?'✓ Paid':'Unpaid'):'Not going')+'</div></div>'
-        // IN / OUT
-        +'<div style="display:flex;gap:4px;align-items:center">'
-        +'<button id="btn-in-'+sk+'" class="opt-btn'+(status==='in'?' in-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'in\')">In</button>'
-        +'<button id="btn-out-'+sk+'" class="opt-btn'+(status==='out'?' out-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'out\')">Out</button>'
+        +'<div class="person-status" id="pstatus-'+sk+'">'+(inFlag?(paidFlag?'✓ Paid':'Unpaid'):'Not going')+'</div></div>'
+        +'<div style="display:flex;gap:4px">'
+        +'<button id="btn-in-'+sk+'" class="opt-btn'+(inFlag?' in-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'in\')">In</button>'
+        +'<button id="btn-out-'+sk+'" class="opt-btn'+(!inFlag?' out-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'out\')">Out</button>'
         +'</div>'
-        // PAID / UNPAID (only active if IN)
-        +'<div style="display:flex;gap:4px;align-items:center;margin-left:6px">'
-        +'<button id="btn-paid-'+sk+'" class="opt-btn'+(paid?' paid-active':'')+'" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',true)"'+(inFlag?'':' disabled')+'>Paid</button>'
-        +'<button id="btn-unpaid-'+sk+'" class="opt-btn'+(!paid&&inFlag?' unpaid-active':'')+'" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',false)"'+(inFlag?'':' disabled')+'>Not Paid</button>'
-        +'</div>'
-        +'</div>';
+        +'<div style="display:flex;gap:4px;margin-left:6px">'
+        +'<button id="btn-paid-'+sk+'" class="opt-btn'+(paidFlag?' paid-active':'')+'" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',true)"'+(inFlag?'':' disabled')+'>Paid</button>'
+        +'<button id="btn-not-'+sk+'" class="opt-btn" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',false)"'+(inFlag?'':' disabled')+'>Not Paid</button>'
+        +'</div></div>';
     }).join('');
-
-    var tiktokBtn = act.tiktok
-      ? '<a href="'+act.tiktok+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:4px 8px;font-size:10px;color:#ccc;text-decoration:none;font-family:var(--mono)">🎵 TikTok</a>'
-      : '';
-    var adminBtns = S.isAdmin
-      ? '<button class="btn btn-ghost btn-xs" onclick="openEditAct(\''+act.id+'\')">Edit</button>'
-        +'<button class="btn btn-danger btn-xs" onclick="deleteActivity(\''+act.id+'\')">Delete</button>'
-      : '';
 
     return '<div class="act-card">'
       +'<div class="act-header">'
-      +'<div class="act-icon">'+act.emoji+'</div>'
-      +'<div class="act-info">'
-      +'<div class="act-name">'+act.name+'</div>'
-      +'<div class="act-price">$'+act.price.toFixed(2)+' per person'+(act.desc?' · <span style="color:var(--text3)">'+act.desc+'</span>':'')+'</div>'
-      +'</div>'
-      +'<div class="act-stats">'
-      +'<div class="act-stat"><div class="act-stat-val" id="stat-in-'+act.id+'" style="color:var(--green)">'+st.inCount+'</div><div class="act-stat-label">In</div></div>'
-      +'<div class="act-stat"><div class="act-stat-val" id="stat-col-'+act.id+'" style="color:var(--gold)">$'+st.collected.toFixed(0)+'</div><div class="act-stat-label" id="stat-exp-'+act.id+'">of $'+st.expected.toFixed(0)+'</div></div>'
-      +'</div>'
-      +'</div>'
-      // Progress bar
+      +'<div class="act-icon">'+(act.emoji||'🎯')+'</div>'
+      +'<div class="act-info"><div class="act-name">'+act.name+'</div>'
+      +'<div class="act-price">$'+(act.price||0).toFixed(2)+' per person'+(act.description?' · <span style="color:var(--text3)">'+act.description+'</span>':'')+'</div></div>'
+      +'<div style="display:flex;gap:16px;align-items:center">'
+      +'<div style="text-align:right"><div style="font-family:var(--display);font-size:16px;font-weight:700;color:var(--green)" id="stat-in-'+act.id+'">'+st.inCount+'</div><div style="font-size:9px;color:var(--text3)">IN</div></div>'
+      +'<div style="text-align:right"><div style="font-family:var(--display);font-size:16px;font-weight:700;color:var(--gold)" id="stat-col-'+act.id+'">$'+st.collected.toFixed(0)+'</div><div style="font-size:9px;color:var(--text3)" id="stat-exp-'+act.id+'">of $'+st.expected.toFixed(0)+'</div></div>'
+      +'</div></div>'
       +'<div style="padding:6px 18px;border-bottom:1px solid var(--border);background:var(--bg3)">'
       +'<div class="prog-bar"><div class="prog-fill" id="prog-'+act.id+'" style="width:'+pct+'%;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3)">'
       +'<span>'+pct+'% collected</span>'
       +(tiktokBtn?'<span>'+tiktokBtn+'</span>':'')
       +(adminBtns?'<span style="display:flex;gap:4px">'+adminBtns+'</span>':'')
-      +'</div>'
-      +'</div>'
-      // People rows
-      +(S.people.length
-        ? peopleRows
-        : '<div class="empty" style="padding:20px"><div class="empty-sub">No people added yet</div></div>')
+      +'</div></div>'
+      +(S.people.length ? rows : '<div class="empty" style="padding:20px"><div class="empty-sub">No people added yet</div></div>')
       +'</div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  RENDER PEOPLE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 function renderPeople() {
   el('nb-people').textContent = S.people.length;
   el('people-badge').textContent = S.people.length;
   var container = el('people-list');
   if(!S.people.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No people yet</div><div class="empty-sub">'+(S.isAdmin?'Click "+ Add Person" to add travelers':'Ask admin to add people')+'</div></div>';
+    container.innerHTML='<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No people yet</div><div class="empty-sub">'+(S.isAdmin?'Click "+ Add Person"':'Ask admin to add people')+'</div></div>';
     return;
   }
   container.innerHTML = S.people.map(function(p) {
-    var actCount = S.activities.filter(function(a){ return isIn(a.id,p.id); }).length;
-    var totalOwed=0, totalPaid=0;
-    S.activities.forEach(function(a){
-      if(isIn(a.id,p.id)){ totalOwed+=a.price; if(isPaid(a.id,p.id)) totalPaid+=a.price; }
-    });
+    var totalOwed=0, totalPaid=0, actCount=0;
+    S.activities.forEach(function(a){ if(isIn(a.id,p.id)){ actCount++; totalOwed+=a.price; if(isPaid(a.id,p.id)) totalPaid+=a.price; } });
     return '<div class="person-row">'
       +'<div class="avatar">'+p.emoji+'</div>'
-      +'<div style="flex:1">'
-      +'<div class="person-name">'+p.name+'</div>'
-      +'<div class="person-status">'+actCount+' activities · $'+totalPaid.toFixed(0)+' paid of $'+totalOwed.toFixed(0)+'</div>'
-      +'</div>'
+      +'<div style="flex:1"><div class="person-name">'+p.name+'</div>'
+      +'<div class="person-status">'+actCount+' activities · $'+totalPaid.toFixed(0)+' paid of $'+totalOwed.toFixed(0)+'</div></div>'
       +(S.isAdmin?'<button class="btn btn-danger btn-xs" onclick="deletePerson(\''+p.id+'\')">Remove</button>':'')
       +'</div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  RENDER MESSAGES
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 function renderMessages() {
   var container = el('msg-list');
   if(!S.activities.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">📩</div><div class="empty-title">No activities yet</div><div class="empty-sub">Add activities to generate messages</div></div>';
+    container.innerHTML='<div class="empty"><div class="empty-icon">📩</div><div class="empty-title">No activities yet</div></div>';
     return;
   }
   container.innerHTML = S.activities.map(function(act) {
-    var msg = 'Hey! Do we want to do ' + act.name + '? 🎌\n'
-      + 'Price: $' + act.price.toFixed(2) + ' per person\n'
-      + (act.tiktok ? 'Check out this video: ' + act.tiktok + '\n' : '')
-      + '\nLet me know if you\'re IN or OUT! 👇';
-
-    var smsUrl = 'sms:?body=' + encodeURIComponent(msg);
-
+    var msg = 'Hey! Do we want to do '+act.name+'? 🎌\nPrice: $'+(act.price||0).toFixed(2)+' per person\n'
+      +(act.tiktok_url?'Check out this video: '+act.tiktok_url+'\n':'')
+      +'\nLet me know if you\'re IN or OUT! 👇';
+    var sms = 'sms:?body='+encodeURIComponent(msg);
     return '<div class="panel" style="margin-bottom:16px">'
-      +'<div class="panel-header"><div class="panel-title">'+act.emoji+' '+act.name+'</div>'
-      +'<span style="font-family:var(--mono);font-size:11px;color:var(--gold)">$'+act.price.toFixed(2)+'/person</span>'
-      +'</div>'
+      +'<div class="panel-header"><div class="panel-title">'+(act.emoji||'🎯')+' '+act.name+'</div>'
+      +'<span style="font-family:var(--mono);font-size:11px;color:var(--gold)">$'+(act.price||0).toFixed(2)+'/person</span></div>'
       +'<div style="padding:14px 18px">'
       +'<div class="msg-box" id="msg-'+act.id+'">'+msg+'</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +'<button class="btn btn-primary btn-sm" onclick="copyMsg(\''+act.id+'\')">📋 Copy Message</button>'
-      +'<a href="'+smsUrl+'" class="btn btn-secondary btn-sm">💬 Open in SMS</a>'
-      +'</div>'
-      +'</div>'
-      +'</div>';
+      +'<button class="btn btn-primary btn-sm" onclick="copyMsg(\''+act.id+'\')">📋 Copy</button>'
+      +'<a href="'+sms+'" class="btn btn-secondary btn-sm">💬 SMS</a>'
+      +'</div></div></div>';
   }).join('');
 }
-
 function copyMsg(actId) {
-  var el2 = el('msg-'+actId);
-  if(!el2) return;
-  navigator.clipboard && navigator.clipboard.writeText(el2.textContent).then(function(){
-    toast('Message copied!','s');
-  }).catch(function(){ toast('Copied!','s'); });
+  var e=el('msg-'+actId); if(!e) return;
+  navigator.clipboard&&navigator.clipboard.writeText(e.textContent).then(function(){ toast('Copied!','s'); });
 }
 
-// ═══════════════════════════════════════════
-//  RENDER SUMMARY
-// ═══════════════════════════════════════════
-function renderSummary() {
-  var container = el('summary-content');
-  if(!S.people.length || !S.activities.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No data yet</div><div class="empty-sub">Add people and activities first</div></div>';
-    return;
-  }
-
-  var rows = S.people.map(function(p) {
-    var acts = S.activities.filter(function(a){ return isIn(a.id,p.id); });
-    var owed=0, paid=0;
-    acts.forEach(function(a){ owed+=a.price; if(isPaid(a.id,p.id)) paid+=a.price; });
-    var due = owed - paid;
-    return { person:p, acts:acts, owed:owed, paid:paid, due:due };
-  }).sort(function(a,b){ return b.due-a.due; });
-
-  var totalOwed=0, totalPaid=0;
-  rows.forEach(function(r){ totalOwed+=r.owed; totalPaid+=r.paid; });
-
-  container.innerHTML = '<div class="kpi-grid" style="margin-bottom:20px">'
-    +'<div class="kpi" style="--kc:var(--gold)"><div class="kpi-label">Total Expected</div><div class="kpi-val">$'+totalOwed.toFixed(0)+'</div></div>'
-    +'<div class="kpi" style="--kc:var(--green)"><div class="kpi-val" style="color:var(--green)">$'+totalPaid.toFixed(0)+'</div><div class="kpi-label">Collected</div></div>'
-    +'<div class="kpi" style="--kc:var(--red)"><div class="kpi-val" style="color:var(--amber)">$'+(totalOwed-totalPaid).toFixed(0)+'</div><div class="kpi-label">Outstanding</div></div>'
-    +'</div>'
-    +'<div class="panel">'
-    +'<div class="panel-header"><div class="panel-title">💰 Who Owes What</div></div>'
-    +rows.map(function(r) {
-      var pct = r.owed>0 ? Math.round(r.paid/r.owed*100) : 100;
-      return '<div style="padding:12px 18px;border-bottom:1px solid var(--border)">'
-        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
-        +'<div class="avatar">'+r.person.emoji+'</div>'
-        +'<div style="flex:1"><div class="person-name">'+r.person.name+'</div>'
-        +'<div class="person-status">'+r.acts.length+' activities selected</div></div>'
-        +'<div style="text-align:right">'
-        +'<div style="font-family:var(--display);font-size:15px;font-weight:700;color:'+(r.due>0?'var(--amber)':'var(--green)')+'">$'+r.due.toFixed(0)+' due</div>'
-        +'<div style="font-size:10px;color:var(--text3)">$'+r.paid.toFixed(0)+' of $'+r.owed.toFixed(0)+' paid</div>'
-        +'</div></div>'
-        +'<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'
-        +'<div style="font-size:9px;color:var(--text3);margin-top:3px">'+r.acts.map(function(a){return a.name+(isPaid(a.id,r.person.id)?' ✓':'');}).join(' · ')+'</div>'
-        +'</div>';
-    }).join('')
-    +'</div>';
-}
-
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  RENDER OVERVIEW
-// ═══════════════════════════════════════════
-function updateOverview() {
-  var totalExpected=0, totalCollected=0;
-  S.activities.forEach(function(a){
-    var st=actStats(a); totalExpected+=st.expected; totalCollected+=st.collected;
-  });
-  el('ov-acts').textContent    = S.activities.length;
-  el('ov-people').textContent  = S.people.length;
-  el('ov-collected').textContent = '$'+totalCollected.toFixed(0);
-  el('ov-collected-sub').textContent = 'of $'+totalExpected.toFixed(0)+' expected';
-  el('ov-owed').textContent = '$'+(totalExpected-totalCollected).toFixed(0);
-}
-
+// ═══════════════════════════════
 function renderOverview() {
-  updateOverview();
-  var container = el('ov-activity-list');
+  updateOverviewKPIs();
+  var container = el('ov-list');
   if(!S.activities.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-title">No activities yet</div><div class="empty-sub">Add activities to see the overview</div></div>';
+    container.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><div class="empty-title">No activities yet</div></div>';
     return;
   }
   container.innerHTML = S.activities.map(function(act) {
-    var st = actStats(act);
-    var pct = st.expected>0 ? Math.round(st.collected/st.expected*100) : 0;
+    var st=actStats(act); var pct=st.expected>0?Math.round(st.collected/st.expected*100):0;
     return '<div class="panel" style="margin-bottom:12px">'
       +'<div style="padding:12px 16px;display:flex;align-items:center;gap:10px">'
-      +'<div class="act-icon" style="width:32px;height:32px;font-size:14px">'+act.emoji+'</div>'
+      +'<div class="act-icon" style="width:32px;height:32px;font-size:14px">'+(act.emoji||'🎯')+'</div>'
       +'<div style="flex:1"><div style="font-family:var(--display);font-size:13px;font-weight:600;color:var(--text)">'+act.name+'</div>'
-      +'<div style="font-size:10px;color:var(--text3)">'+'$'+act.price.toFixed(2)+'/person</div></div>'
+      +'<div style="font-size:10px;color:var(--text3)">$'+(act.price||0).toFixed(2)+'/person</div></div>'
       +'<div style="display:flex;gap:16px;text-align:right">'
       +'<div><div style="font-family:var(--display);font-size:15px;font-weight:700;color:var(--green)">'+st.inCount+'</div><div style="font-size:9px;color:var(--text3)">IN</div></div>'
       +'<div><div style="font-family:var(--display);font-size:15px;font-weight:700;color:var(--gold)">$'+st.collected.toFixed(0)+'</div><div style="font-size:9px;color:var(--text3)">collected</div></div>'
       +'</div></div>'
       +'<div style="padding:0 16px 10px"><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'
-      +'<div style="font-size:9px;color:var(--text3)">'+pct+'% · $'+(st.expected-st.collected).toFixed(0)+' still owed</div></div>'
-      +'</div>';
+      +'<div style="font-size:9px;color:var(--text3)">'+pct+'% · $'+(st.expected-st.collected).toFixed(0)+' still owed</div></div></div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════
-//  EXPORT
-// ═══════════════════════════════════════════
-function exportSummary() {
-  var lines = ['Name,Activity,Status,Paid,Amount'];
+// ═══════════════════════════════
+//  RENDER SUMMARY
+// ═══════════════════════════════
+function renderSummary() {
+  var container = el('summary-content');
+  if(!S.people.length||!S.activities.length){
+    container.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No data yet</div></div>';
+    return;
+  }
+  var rows=S.people.map(function(p){
+    var owed=0,paid=0,acts=[];
+    S.activities.forEach(function(a){ if(isIn(a.id,p.id)){ owed+=a.price; acts.push(a); if(isPaid(a.id,p.id)) paid+=a.price; } });
+    return {person:p,acts:acts,owed:owed,paid:paid,due:owed-paid};
+  }).sort(function(a,b){ return b.due-a.due; });
+  var tOwed=0,tPaid=0;
+  rows.forEach(function(r){ tOwed+=r.owed; tPaid+=r.paid; });
+  container.innerHTML='<div class="kpi-grid" style="margin-bottom:20px">'
+    +'<div class="kpi" style="--kc:var(--gold)"><div class="kpi-label">Total Expected</div><div class="kpi-val">$'+tOwed.toFixed(0)+'</div></div>'
+    +'<div class="kpi" style="--kc:var(--green)"><div class="kpi-val" style="color:var(--green)">$'+tPaid.toFixed(0)+'</div><div class="kpi-label">Collected</div></div>'
+    +'<div class="kpi" style="--kc:var(--amber)"><div class="kpi-val" style="color:var(--amber)">$'+(tOwed-tPaid).toFixed(0)+'</div><div class="kpi-label">Outstanding</div></div>'
+    +'</div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">💰 Who Owes What</div></div>'
+    +rows.map(function(r){
+      var pct=r.owed>0?Math.round(r.paid/r.owed*100):100;
+      return '<div style="padding:12px 18px;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div class="avatar">'+r.person.emoji+'</div>'
+        +'<div style="flex:1"><div class="person-name">'+r.person.name+'</div>'
+        +'<div class="person-status">'+r.acts.length+' activities</div></div>'
+        +'<div style="text-align:right"><div style="font-family:var(--display);font-size:15px;font-weight:700;color:'+(r.due>0?'var(--amber)':'var(--green)')+'">$'+r.due.toFixed(0)+' due</div>'
+        +'<div style="font-size:10px;color:var(--text3)">$'+r.paid.toFixed(0)+' of $'+r.owed.toFixed(0)+' paid</div></div></div>'
+        +'<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>'
+        +'<div style="font-size:9px;color:var(--text3);margin-top:3px">'+r.acts.map(function(a){ return a.name+(isPaid(a.id,r.person.id)?' ✓':''); }).join(' · ')+'</div>'
+        +'</div>';
+    }).join('')+'</div>';
+}
+
+function exportCSV() {
+  var lines=['Name,Activity,Status,Paid,Amount'];
   S.people.forEach(function(p){
     S.activities.forEach(function(a){
-      var status = getStatus(a.id,p.id);
-      var paid   = isPaid(a.id,p.id);
-      lines.push([p.name,a.name,status,paid?'Yes':'No',isIn(a.id,p.id)?'$'+a.price.toFixed(2):'$0'].join(','));
+      lines.push([p.name,a.name,isIn(a.id,p.id)?'IN':'OUT',isPaid(a.id,p.id)?'Yes':'No',isIn(a.id,p.id)?'$'+(a.price||0).toFixed(2):'$0'].join(','));
     });
   });
-  var blob = new Blob([lines.join('\n')], {type:'text/csv'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'trip-summary.csv';
-  a.click();
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var lnk=document.createElement('a'); lnk.href=URL.createObjectURL(blob); lnk.download='trip-summary.csv'; lnk.click();
   toast('CSV exported!','s');
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  RENDER ROUTER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 function renderPage(pageId) {
-  switch(pageId) {
-    case 'overview':   renderOverview();    break;
-    case 'activities': renderActivities();  break;
-    case 'people':     renderPeople();      break;
-    case 'messages':   renderMessages();    break;
-    case 'summary':    renderSummary();     break;
+  switch(pageId){
+    case 'overview':   renderOverview();   break;
+    case 'activities': renderActivities(); break;
+    case 'people':     renderPeople();     break;
+    case 'messages':   renderMessages();   break;
+    case 'summary':    renderSummary();    break;
   }
   applyAdmin();
 }
-
 function renderAll() {
   renderOverview();
   renderActivities();
@@ -880,86 +815,12 @@ function renderAll() {
   applyAdmin();
 }
 
-// ═══════════════════════════════════════════
-//  SEED DEFAULT ACTIVITIES
-// ═══════════════════════════════════════════
-var SEED_ACTIVITIES = [
-  // Pre-Trip
-  {name:'Pocket WiFi (Airport Pickup)',      price:26.00,  emoji:'📱', tiktok:'', desc:'~$1.85/day × 14 days · Klook'},
-  {name:'eSIM (Softbank/Docomo, Unlimited)', price:5.35,   emoji:'📱', tiktok:'', desc:'💡 Best value — no pickup needed · Klook'},
-  // Apr 28 — Tokyo
-  {name:'Sensō-ji Temple',                  price:0,      emoji:'⛩', tiktok:'https://www.tiktok.com/search?q=sensoji+temple+tokyo',          desc:'Asakusa — always open · FREE'},
-  // Apr 29 — Tokyo
-  {name:'Asakusa Mameshiba Cafe',           price:11,     emoji:'🐾', tiktok:'https://www.tiktok.com/search?q=mameshiba+cafe+tokyo',          desc:'Entry + interaction fee · Klook'},
-  {name:'Cinnamoroll Cafe',                 price:4,      emoji:'🎀', tiktok:'https://www.tiktok.com/search?q=cinnamoroll+cafe+japan',        desc:'Reservation fee + food extra'},
-  {name:'Meiji Jingu',                      price:0,      emoji:'⛩', tiktok:'https://www.tiktok.com/search?q=meiji+jingu+tokyo',             desc:'Free · Inner Hall ~$7 optional'},
-  {name:'Takeshita Street / Shibuya Crossing', price:0,   emoji:'🛍', tiktok:'https://www.tiktok.com/search?q=shibuya+crossing+tokyo',        desc:'Free exploration · Hachiko'},
-  {name:'HARRY Otter Cafe',                 price:30,     emoji:'🦦', tiktok:'https://www.tiktok.com/search?q=harry+otter+cafe+tokyo',        desc:'Reservation required · Klook'},
-  {name:'Street Go-Kart (Shibuya)',         price:65.25,  emoji:'🏎', tiktok:'https://www.tiktok.com/search?q=tokyo+street+go+kart',          desc:'Klook price'},
-  // Apr 30 — Tokyo
-  {name:'Sanrio Puroland',                  price:4.19,   emoji:'🌸', tiktok:'https://www.tiktok.com/search?q=sanrio+puroland+japan',         desc:'Varies by date · Klook'},
-  {name:'ICHIRAN Ramen',                    price:12,     emoji:'🍜', tiktok:'https://www.tiktok.com/search?q=ichiran+ramen+japan',           desc:'Solo booth ramen experience'},
-  {name:'Omoide Yokocho',                   price:0,      emoji:'🏮', tiktok:'https://www.tiktok.com/search?q=omoide+yokocho+shinjuku',       desc:'Free entry · food extra'},
-  {name:'Sumo Show (Shinjuku)',             price:70.75,  emoji:'🤼', tiktok:'https://www.tiktok.com/search?q=sumo+show+tokyo',              desc:'Klook price'},
-  // May 1 — Mt. Fuji
-  {name:'Mount Fuji 5th Station',           price:0,      emoji:'🗻', tiktok:'https://www.tiktok.com/search?q=mount+fuji+5th+station',        desc:'Free · bus ~$25–30 extra'},
-  {name:'Arakurayama Sengen Park',          price:0,      emoji:'🏯', tiktok:'https://www.tiktok.com/search?q=arakurayama+sengen+park',       desc:'Iconic pagoda view — free'},
-  {name:'Oshino Hakkai',                    price:1,      emoji:'💧', tiktok:'https://www.tiktok.com/search?q=oshino+hakkai+japan',           desc:'Eight sacred ponds · ~$1 donation'},
-  {name:'Oishi Park',                       price:0,      emoji:'🌸', tiktok:'https://www.tiktok.com/search?q=oishi+park+fuji',              desc:'Lake Kawaguchi lakeside — free'},
-  // May 2 — Tokyo
-  {name:'Arcades (TAITO / GiGO)',           price:20,     emoji:'🕹', tiktok:'https://www.tiktok.com/search?q=tokyo+arcade+japan',            desc:'Budget varies · $10–$30'},
-  {name:'Wagyu Yakiniku Ushihachi',         price:45,     emoji:'🥩', tiktok:'https://www.tiktok.com/search?q=wagyu+yakiniku+tokyo',          desc:'Per person estimate · $30–$60'},
-  {name:'teamLab Planets',                  price:28.19,  emoji:'🌊', tiktok:'https://www.tiktok.com/search?q=teamlab+planets+tokyo',         desc:'Book ahead! · Klook'},
-  {name:'Kirby Café',                       price:3,      emoji:'🌟', tiktok:'https://www.tiktok.com/search?q=kirby+cafe+japan',              desc:'Reservation fee + food extra'},
-  // May 3 — Tokyo → Osaka
-  {name:'Shinkansen (Bullet Train)',        price:87.95,  emoji:'🚄', tiktok:'https://www.tiktok.com/search?q=shinkansen+japan',              desc:'Tokyo → Osaka · Klook or JR Pass'},
-  {name:'Osaka Amazing Pass (1-day)',       price:21.99,  emoji:'🎫', tiktok:'https://www.tiktok.com/search?q=osaka+amazing+pass',            desc:'Subway + many attractions · Klook'},
-  {name:'Katsuoji Temple',                  price:3,      emoji:'⛩', tiktok:'https://www.tiktok.com/search?q=katsuoji+temple+osaka',         desc:'Daruma temple — small entry fee'},
-  {name:'Dotonbori / Don Quijote',          price:0,      emoji:'🎪', tiktok:'https://www.tiktok.com/search?q=dotonbori+osaka',              desc:'Free to explore · food extra'},
-  {name:'Round 1 (Osaka)',                  price:10,     emoji:'🎳', tiktok:'https://www.tiktok.com/search?q=round1+osaka',                 desc:'Bowling, arcade, sports · $5–$15'},
-  // May 4 — Nara + Osaka
-  {name:'Nara Park (Deer)',                 price:0,      emoji:'🦌', tiktok:'https://www.tiktok.com/search?q=nara+park+deer+japan',          desc:'Free · deer crackers ~$1.50'},
-  {name:'Tōdai-ji (Great Buddha)',          price:7,      emoji:'🏛', tiktok:'https://www.tiktok.com/search?q=todaiji+nara+great+buddha',     desc:'Admission fee'},
-  {name:'Pokémon Café (Osaka)',             price:4,      emoji:'⚡', tiktok:'https://www.tiktok.com/search?q=pokemon+cafe+japan',            desc:'Reservation fee + food extra'},
-  {name:'Kushikatsu Ittoku',               price:20,     emoji:'🍢', tiktok:'https://www.tiktok.com/search?q=kushikatsu+osaka',              desc:'Osaka deep-fried skewers · $15–$25'},
-  {name:'Tsutenkaku Tower',                price:7,      emoji:'🗼', tiktok:'https://www.tiktok.com/search?q=tsutenkaku+tower+osaka',        desc:'Shinsekai tower admission'},
-  // May 5 — Kyoto
-  {name:'Arashiyama Bamboo Forest',        price:0,      emoji:'🎋', tiktok:'https://www.tiktok.com/search?q=arashiyama+bamboo+forest',      desc:'Free — go early morning'},
-  {name:'Fushimi Inari Taisha',            price:0,      emoji:'⛩', tiktok:'https://www.tiktok.com/search?q=fushimi+inari+kyoto',           desc:'Free — thousands of torii gates'},
-  {name:'Kiyomizu-dera',                   price:3.50,   emoji:'🏯', tiktok:'https://www.tiktok.com/search?q=kiyomizudera+kyoto',           desc:'Admission fee'},
-  {name:'Higashiyama / Gion District',     price:0,      emoji:'🏮', tiktok:'https://www.tiktok.com/search?q=gion+kyoto+japan',             desc:'Free to walk · shops/food extra'},
-  {name:'glänta Kyoto',                    price:22,     emoji:'🍽', tiktok:'https://www.tiktok.com/search?q=glanta+kyoto+restaurant',      desc:'Scandinavian-Japanese dinner · $15–$30'},
-  // May 6 — USJ
-  {name:'Universal Studios Japan (USJ)',   price:56.10,  emoji:'🎢', tiktok:'https://www.tiktok.com/search?q=universal+studios+japan',      desc:'From $56.10 · peak $75–$85 · Klook'},
-  // May 7 — Okinawa
-  {name:'Car Rental (Okinawa)',            price:19,     emoji:'🚗', tiktok:'https://www.tiktok.com/search?q=okinawa+car+rental',            desc:'~$19/day — needed for north island'},
-  {name:'Churaumi Aquarium',               price:14.10,  emoji:'🐠', tiktok:'https://www.tiktok.com/search?q=churaumi+aquarium+okinawa',    desc:'One of the world\'s largest · Klook'},
-  {name:'Kouri Bridge / Cape Manzamo',     price:0,      emoji:'🌊', tiktok:'https://www.tiktok.com/search?q=kouri+bridge+okinawa',         desc:'Scenic coastal spots — free'},
-  {name:'Emerald Beach',                   price:0.50,   emoji:'🏖', tiktok:'https://www.tiktok.com/search?q=emerald+beach+okinawa',        desc:'Inside Ocean Expo Park'},
-  // May 8 — Okinawa
-  {name:'Kerama Islands Snorkeling',       price:56.59,  emoji:'🤿', tiktok:'https://www.tiktok.com/search?q=kerama+islands+snorkeling',    desc:'Full day · boat + gear · Klook'},
-  // May 9 — Okinawa
-  {name:'Blue Cave Snorkeling',            price:29.95,  emoji:'🦈', tiktok:'https://www.tiktok.com/search?q=blue+cave+snorkeling+okinawa', desc:'Famous sea cave · Klook'},
-  {name:'American Village',                price:0,      emoji:'🏪', tiktok:'https://www.tiktok.com/search?q=american+village+okinawa',     desc:'Free to explore · shopping/food extra'},
-  // May 10 — Okinawa
-  {name:'Shuri Castle',                    price:3,      emoji:'🏯', tiktok:'https://www.tiktok.com/search?q=shuri+castle+okinawa',         desc:'UNESCO World Heritage Site'},
-  {name:'Kokusai Street',                  price:0,      emoji:'🛍', tiktok:'https://www.tiktok.com/search?q=kokusai+street+okinawa',       desc:'Main shopping street — free to walk'},
-  {name:'Amigo Tacos / Yunangi',           price:22,     emoji:'🌮', tiktok:'https://www.tiktok.com/search?q=okinawa+food+restaurants',     desc:'Final night Okinawan cuisine · $15–$30'},
-];
-
-// ═══════════════════════════════════════════
+// ═══════════════════════════════
 //  BOOT
-// ═══════════════════════════════════════════
-// Seed activities if empty
-if (S.activities.length === 0) {
-  S.activities = SEED_ACTIVITIES.map(function(a) {
-    return { id:uid(), name:a.name, price:a.price, emoji:a.emoji, tiktok:a.tiktok, desc:a.desc };
-  });
-  save();
-}
-
+// ═══════════════════════════════
 applyAdmin();
-renderAll();
+setupRealtime();
+loadAll();
 </script>
 </body>
 </html>
