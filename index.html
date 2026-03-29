@@ -135,10 +135,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
 @media(max-width:768px){
   .sidebar{display:none;}
   #mobile-nav{display:flex;}
-  .page{padding:16px 14px;padding-bottom:90px;}
+  .page{padding:16px 14px;padding-bottom:100px;}
   .fr2{grid-template-columns:1fr;}
   .kpi-grid{grid-template-columns:1fr 1fr;}
+  /* Larger touch targets on mobile */
+  .opt-btn{min-width:52px;padding:10px 12px;font-size:13px;}
+  .btn-xs{padding:7px 12px;font-size:12px;}
+  .btn-sm{padding:8px 14px;font-size:13px;}
+  /* Stack person row buttons on small screens */
+  .person-row{flex-wrap:wrap;gap:8px;padding:12px 14px;}
+  .person-row .btn-group{display:flex;gap:6px;flex-wrap:wrap;}
+  /* Bigger nav buttons */
+  .mnav-btn{padding:12px 4px;}
+  .mnav-icon{font-size:20px;}
+  /* Prevent tap flash */
+  * { -webkit-tap-highlight-color: transparent; }
+  /* Prevent iOS zoom on input focus */
+  .fi{font-size:16px;}
+  /* Modal full width on mobile */
+  .modal{border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%;max-height:85vh;margin:0;}
+  .modal-overlay{align-items:flex-end;}
+  /* Act header wraps */
+  .act-header{flex-wrap:wrap;gap:8px;}
 }
+/* iOS safe area for bottom nav */
+#mobile-nav{padding-bottom:max(env(safe-area-inset-bottom), 8px);}
+/* Smooth scrolling */
+.main{-webkit-overflow-scrolling:touch;}
+/* Remove blue highlight on tap everywhere */
+a,button,div[onclick]{-webkit-tap-highlight-color:transparent;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .page.active{animation:fadeIn .2s ease-out;}
 </style>
@@ -242,6 +267,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13
     <button class="mnav-btn"        id="mn-people"      onclick="mGo('people',this)"><span class="mnav-icon">👥</span>People</button>
     <button class="mnav-btn"        id="mn-messages"    onclick="mGo('messages',this)"><span class="mnav-icon">📩</span>Messages</button>
     <button class="mnav-btn"        id="mn-summary"     onclick="mGo('summary',this)"><span class="mnav-icon">📊</span>Summary</button>
+    <button class="mnav-btn"        id="mn-admin"       onclick="toggleAdmin()" style="position:relative">
+      <span class="mnav-icon" id="mn-admin-icon">🔓</span>
+      <span id="mn-admin-label">Admin</span>
+    </button>
   </div>
 </nav>
 
@@ -426,6 +455,13 @@ function applyAdmin() {
   el('admin-icon').textContent  = S.isAdmin ? '🔑' : '🔓';
   el('admin-label').textContent = S.isAdmin ? 'Admin: ON' : 'Admin Mode';
   el('admin-pill').className    = 'admin-pill ' + (S.isAdmin ? 'on' : 'off');
+  // Mobile nav admin button
+  var mnIcon  = el('mn-admin-icon');
+  var mnLabel = el('mn-admin-label');
+  var mnBtn   = el('mn-admin');
+  if(mnIcon)  mnIcon.textContent  = S.isAdmin ? '🔑' : '🔓';
+  if(mnLabel) mnLabel.textContent = S.isAdmin ? 'Admin ✓' : 'Admin';
+  if(mnBtn)   mnBtn.style.color   = S.isAdmin ? 'var(--accent)' : '';
   var a = el('acts-admin-btns');
   var p = el('people-admin-btns');
   if(a) a.style.display = S.isAdmin ? '' : 'none';
@@ -622,7 +658,7 @@ function renderActivities() {
     if(actsFilter==='in' && st.inCount===0) return '';
 
     var tiktokBtn = act.tiktok_url
-      ? '<a href="'+act.tiktok_url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:4px 8px;font-size:10px;color:#ccc;text-decoration:none">🎵 TikTok</a>' : '';
+      ? '<button onclick="openTikTok(\''+act.tiktok_url+'\')" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:5px 10px;font-size:11px;color:#fff;cursor:pointer;font-family:var(--mono)">🎵 TikTok</button>' : '';
     var adminBtns = S.isAdmin
       ? '<button class="btn btn-ghost btn-xs" onclick="openEditAct(\''+act.id+'\')">Edit</button><button class="btn btn-danger btn-xs" onclick="deleteActivity(\''+act.id+'\')">Delete</button>' : '';
 
@@ -632,13 +668,13 @@ function renderActivities() {
       var paidFlag=isPaid(act.id,p.id);
       return '<div id="row-'+sk+'" class="person-row'+(inFlag?' is-in':'')+'">'
         +'<div class="avatar">'+p.emoji+'</div>'
-        +'<div style="flex:1"><div class="person-name">'+p.name+'</div>'
+        +'<div style="flex:1;min-width:80px"><div class="person-name">'+p.name+'</div>'
         +'<div class="person-status" id="pstatus-'+sk+'">'+(inFlag?(paidFlag?'✓ Paid':'Unpaid'):'Not going')+'</div></div>'
-        +'<div style="display:flex;gap:4px">'
+        +'<div class="btn-group">'
         +'<button id="btn-in-'+sk+'" class="opt-btn'+(inFlag?' in-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'in\')">In</button>'
         +'<button id="btn-out-'+sk+'" class="opt-btn'+(!inFlag?' out-active':'')+'" onclick="setStatus(\''+act.id+'\',\''+p.id+'\',\'out\')">Out</button>'
         +'</div>'
-        +'<div style="display:flex;gap:4px;margin-left:6px">'
+        +'<div class="btn-group" style="margin-left:6px">'
         +'<button id="btn-paid-'+sk+'" class="opt-btn'+(paidFlag?' paid-active':'')+'" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',true)"'+(inFlag?'':' disabled')+'>Paid</button>'
         +'<button id="btn-not-'+sk+'" class="opt-btn" onclick="setPayment(\''+act.id+'\',\''+p.id+'\',false)"'+(inFlag?'':' disabled')+'>Not Paid</button>'
         +'</div></div>';
@@ -710,6 +746,7 @@ function renderMessages() {
       +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
       +'<button class="btn btn-primary btn-sm" onclick="copyMsg(\''+act.id+'\')">📋 Copy</button>'
       +'<a href="'+sms+'" class="btn btn-secondary btn-sm">💬 SMS</a>'
+      +(act.tiktok_url ? '<button class="btn btn-secondary btn-sm" onclick="openTikTok(\''+act.tiktok_url+'\')">🎵 TikTok</button>' : '')
       +'</div></div></div>';
   }).join('');
 }
@@ -813,6 +850,31 @@ function renderAll() {
   renderMessages();
   renderSummary();
   applyAdmin();
+}
+
+// ═══════════════════════════════
+//  TIKTOK DEEP LINK
+// ═══════════════════════════════
+function openTikTok(webUrl) {
+  // Convert web URL to TikTok app deep link
+  // snssdk1233:// is the TikTok app scheme on iOS & Android
+  var appUrl = webUrl
+    .replace('https://www.tiktok.com', 'snssdk1233://')
+    .replace('https://vm.tiktok.com', 'snssdk1233://');
+
+  // Try to open the app; if it fails after 800ms, fall back to browser
+  var didOpen = false;
+  var start = Date.now();
+
+  window.location.href = appUrl;
+
+  setTimeout(function() {
+    // If the app opened, the page would have blurred — check via elapsed time
+    if (Date.now() - start < 1500) {
+      // App didn't open — fall back to web
+      window.open(webUrl, '_blank');
+    }
+  }, 800);
 }
 
 // ═══════════════════════════════
